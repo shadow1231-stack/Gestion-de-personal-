@@ -17,13 +17,12 @@ export function LoginForm({ onSubmit, loading, error }: LoginFormProps) {
 
   return (
     <form
-      className="card"
+      className="auth-form"
       onSubmit={(e) => {
         e.preventDefault();
         onSubmit({ email, password });
       }}
     >
-      <h2>Iniciar sesión</h2>
       {error !== null && <Alert message={error} />}
       <TextField
         id="email"

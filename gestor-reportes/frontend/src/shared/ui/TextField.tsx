@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 interface TextFieldProps {
   id: string;
   label: string;
@@ -20,6 +22,10 @@ export function TextField({
   placeholder = '',
   multiline = false,
 }: TextFieldProps) {
+  const [reveal, setReveal] = useState(false);
+  const isPassword = type === 'password';
+  const inputType = isPassword && reveal ? 'text' : type;
+
   return (
     <div className="field">
       <label htmlFor={id}>{label}</label>
@@ -32,14 +38,27 @@ export function TextField({
           onChange={(e) => onChange(e.target.value)}
         />
       ) : (
-        <input
-          id={id}
-          type={type}
-          value={value}
-          required={required}
-          placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-        />
+        <div className="input-wrap">
+          <input
+            id={id}
+            type={inputType}
+            className={isPassword ? 'has-toggle' : undefined}
+            value={value}
+            required={required}
+            placeholder={placeholder}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          {isPassword && (
+            <button
+              type="button"
+              className="reveal"
+              onClick={() => setReveal((prev) => !prev)}
+              aria-label={reveal ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            >
+              {reveal ? '🙈' : '👁️'}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
