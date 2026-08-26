@@ -23,7 +23,7 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, init: RequestInit): Promise<ApiResponse<T>> {
   const headers = new Headers(init.headers);
   headers.set('Content-Type', 'application/json');
   if (accessToken) {
@@ -36,8 +36,19 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   if (!response.ok || !body.success) {
     throw new ApiError(body.message || 'Error de red', response.status);
   }
+  return body;
+}
+
+/** Petición que devuelve datos; falla si el servidor no envía `data`. */
+export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const body = await request<T>(path, init);
   if (body.data === null) {
-    throw new ApiError('Respuesta sin datos', response.status);
+    throw new ApiError('Respuesta sin datos', 500);
   }
   return body.data;
+}
+
+/** Petición sin cuerpo de datos esperado (p. ej. DELETE). */
+export async function apiSend(path: string, init: RequestInit = {}): Promise<void> {
+  await request<unknown>(path, init);
 }

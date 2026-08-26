@@ -41,6 +41,8 @@ ignore = []
 # En tests: assert permitido, sin anotaciones obligatorias, y "contraseñas"
 # de prueba (S105/S106) que no son secretos reales.
 "tests/**" = ["S101", "S105", "S106", "S107", "ANN"]
+# Los scripts de utilería sí pueden imprimir a consola.
+"scripts/**" = ["T201"]
 
 [tool.mypy]
 python_version = "3.12"

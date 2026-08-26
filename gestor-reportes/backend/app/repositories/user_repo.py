@@ -20,3 +20,20 @@ def create(db: Session, *, email: str, full_name: str, hashed_password: str) -> 
     db.commit()
     db.refresh(user)
     return user
+
+
+def list_all(db: Session) -> list[User]:
+    return list(db.scalars(select(User).order_by(User.id)))
+
+
+def update(db: Session, user: User, **fields: object) -> User:
+    for key, value in fields.items():
+        setattr(user, key, value)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def delete(db: Session, user: User) -> None:
+    db.delete(user)
+    db.commit()

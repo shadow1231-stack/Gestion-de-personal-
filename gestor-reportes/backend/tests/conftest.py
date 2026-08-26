@@ -81,3 +81,23 @@ def auth_headers(client: TestClient) -> Callable[..., dict[str, str]]:
         return {"Authorization": f"Bearer {token}"}
 
     return _make
+
+
+@pytest.fixture
+def admin_headers(
+    engine: Engine, auth_headers: Callable[..., dict[str, str]]
+) -> Callable[..., dict[str, str]]:
+    """Factory que crea un usuario, lo promueve a admin y devuelve su cabecera."""
+    from sqlalchemy import update
+    from sqlalchemy.orm import Session
+
+    from app.models.user import User
+
+    def _make(email: str = "admin@example.com", password: str = "AdminPass123") -> dict[str, str]:
+        headers = auth_headers(email=email, password=password, full_name="Admin")
+        with Session(engine) as session:
+            session.execute(update(User).where(User.email == email).values(is_admin=True))
+            session.commit()
+        return headers
+
+    return _make

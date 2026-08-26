@@ -1,10 +1,12 @@
 import { useCallback, useState } from 'react';
 import { ApiError, setAccessToken } from '@/shared/api/client';
-import { login, register } from '@/features/auth/api';
-import type { Credentials, RegisterData } from '@/features/auth/types';
+import { getCurrentUser, login, register } from '@/features/auth/api';
+import type { Credentials, RegisterData, UserRead } from '@/features/auth/types';
 
 interface AuthState {
   isAuthenticated: boolean;
+  isAdmin: boolean;
+  currentUserId: number | null;
   loading: boolean;
   error: string | null;
   signIn: (credentials: Credentials) => Promise<void>;
@@ -18,12 +20,20 @@ interface AuthState {
  */
 export function useAuth(): AuthState {
   const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<UserRead | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const applyToken = useCallback((value: string | null): void => {
-    setAccessToken(value);
-    setToken(value);
+  const reset = useCallback((): void => {
+    setAccessToken(null);
+    setToken(null);
+    setUser(null);
+  }, []);
+
+  const establishSession = useCallback(async (accessToken: string): Promise<void> => {
+    setAccessToken(accessToken);
+    setToken(accessToken);
+    setUser(await getCurrentUser());
   }, []);
 
   const signIn = useCallback(
@@ -32,15 +42,15 @@ export function useAuth(): AuthState {
       setError(null);
       try {
         const data = await login(credentials);
-        applyToken(data.access_token);
+        await establishSession(data.access_token);
       } catch (err) {
-        applyToken(null);
+        reset();
         setError(err instanceof ApiError ? err.message : 'No se pudo iniciar sesión');
       } finally {
         setLoading(false);
       }
     },
-    [applyToken],
+    [establishSession, reset],
   );
 
   const signUp = useCallback(
@@ -50,20 +60,29 @@ export function useAuth(): AuthState {
       try {
         await register(data);
         const tokenData = await login({ email: data.email, password: data.password });
-        applyToken(tokenData.access_token);
+        await establishSession(tokenData.access_token);
       } catch (err) {
-        applyToken(null);
+        reset();
         setError(err instanceof ApiError ? err.message : 'No se pudo crear la cuenta');
       } finally {
         setLoading(false);
       }
     },
-    [applyToken],
+    [establishSession, reset],
   );
 
   const signOut = useCallback((): void => {
-    applyToken(null);
-  }, [applyToken]);
+    reset();
+  }, [reset]);
 
-  return { isAuthenticated: token !== null, loading, error, signIn, signUp, signOut };
+  return {
+    isAuthenticated: token !== null,
+    isAdmin: user?.is_admin ?? false,
+    currentUserId: user?.id ?? null,
+    loading,
+    error,
+    signIn,
+    signUp,
+    signOut,
+  };
 }
