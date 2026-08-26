@@ -66,53 +66,150 @@ body {
   border-color: var(--primary);
 }
 
-/* --- Pantalla de autenticación (rediseño) --- */
-.auth {
+/* --- Pantalla de autenticación estilo SaaS (dos paneles) --- */
+.auth-shell {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr; /* móvil: una columna */
+}
+
+@media (min-width: 860px) {
+  .auth-shell {
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+}
+
+/* Panel de marca (izquierda) */
+.auth-hero {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  padding: 1.75rem 1.5rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 1.25rem;
-  padding: 1.5rem 1rem;
-  max-width: 420px;
-  margin: 0 auto;
+  background: linear-gradient(150deg, #4f46e5 0%, #7c3aed 45%, #0ea5e9 100%);
 }
 
-.auth-brand {
-  text-align: center;
+.auth-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(600px 320px at 92% 8%, rgba(255, 255, 255, 0.18), transparent 60%),
+    radial-gradient(420px 320px at 0% 100%, rgba(255, 255, 255, 0.12), transparent 55%);
 }
 
-.auth-logo {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 0.75rem;
+.auth-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 860px) {
+  .auth-hero {
+    padding: 3rem;
+    justify-content: space-between;
+  }
+}
+
+.hero-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.hero-logo {
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
-  color: #fff;
-  border-radius: 16px;
-  background: linear-gradient(135deg, var(--primary), #22d3ee);
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.18);
 }
 
-.auth-brand h1 {
+.hero-brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.hero-title {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+
+.hero-sub {
+  margin: 0 0 1.5rem;
+  max-width: 34ch;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+}
+
+.hero-features {
+  list-style: none;
   margin: 0;
-  font-size: 1.5rem;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
 }
 
-.auth-brand p {
-  margin: 0.25rem 0 0;
+.hero-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.hero-features svg {
+  flex: none;
+}
+
+.hero-foot {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 859px) {
+  .hero-features,
+  .hero-foot {
+    display: none; /* móvil: banda de marca compacta */
+  }
+}
+
+/* Panel del formulario (derecha) */
+.auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.25rem 1.25rem;
+  background: var(--bg);
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-panel-head {
+  margin-bottom: 1.25rem;
+}
+
+.auth-panel-head h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+}
+
+.auth-panel-head p {
+  margin: 0;
   color: var(--muted);
   font-size: 0.9rem;
-}
-
-.auth-card {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.25rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .segmented {
@@ -140,13 +237,6 @@ body {
 .segmented button.active {
   background: var(--primary);
   color: #fff;
-}
-
-.auth-hint {
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.8rem;
-  margin: 0;
 }
 
 /* Campo con botón para mostrar/ocultar contraseña. */

@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
 
 describe('App', () => {
-  it('renderiza el título principal', () => {
+  it('renderiza la marca en la pantalla de autenticación', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { name: 'Gestor de Reportes' })).toBeInTheDocument();
+    expect(screen.getByText('Gestor de Reportes')).toBeInTheDocument();
   });
 });
