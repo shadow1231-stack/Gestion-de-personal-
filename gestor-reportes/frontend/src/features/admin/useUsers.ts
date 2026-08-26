@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ApiError } from '@/shared/api/client';
 import type { UserRead } from '@/features/auth/types';
-import { deleteUser, listUsers, updateUser } from '@/features/admin/api';
-import type { AdminUserUpdate } from '@/features/admin/types';
+import { createUser, deleteUser, listUsers, updateUser } from '@/features/admin/api';
+import type { AdminUserCreate, AdminUserUpdate } from '@/features/admin/types';
 
 interface UsersState {
   users: UserRead[];
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
+  create: (payload: AdminUserCreate) => Promise<void>;
   save: (id: number, payload: AdminUserUpdate) => Promise<void>;
   remove: (id: number) => Promise<void>;
 }
@@ -35,6 +36,11 @@ export function useUsers(enabled: boolean): UsersState {
     }
   }, []);
 
+  const create = useCallback(async (payload: AdminUserCreate): Promise<void> => {
+    const created = await createUser(payload);
+    setUsers((prev) => [...prev, created]);
+  }, []);
+
   const save = useCallback(async (id: number, payload: AdminUserUpdate): Promise<void> => {
     const updated = await updateUser(id, payload);
     setUsers((prev) => prev.map((user) => (user.id === id ? updated : user)));
@@ -51,5 +57,5 @@ export function useUsers(enabled: boolean): UsersState {
     }
   }, [enabled, refresh]);
 
-  return { users, loading, error, refresh, save, remove };
+  return { users, loading, error, refresh, create, save, remove };
 }

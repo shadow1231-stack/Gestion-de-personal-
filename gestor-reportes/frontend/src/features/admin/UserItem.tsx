@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { Button } from '@/shared/ui/Button';
-import type { UserRead } from '@/features/auth/types';
+import type { Role, UserRead } from '@/features/auth/types';
 import type { AdminUserUpdate } from '@/features/admin/types';
 import { UserEditForm } from '@/features/admin/UserEditForm';
 
 interface UserItemProps {
   user: UserRead;
+  roles: Role[];
   currentUserId: number | null;
   onSave: (id: number, payload: AdminUserUpdate) => Promise<void>;
   onDelete: (id: number) => void;
 }
 
 /** Fila de usuario con acciones de editar/eliminar (§4). */
-export function UserItem({ user, currentUserId, onSave, onDelete }: UserItemProps) {
+export function UserItem({ user, roles, currentUserId, onSave, onDelete }: UserItemProps) {
   const [editing, setEditing] = useState(false);
   const isSelf = user.id === currentUserId;
 
@@ -21,6 +22,7 @@ export function UserItem({ user, currentUserId, onSave, onDelete }: UserItemProp
       <div className="report-item">
         <UserEditForm
           user={user}
+          roles={roles}
           onCancel={() => setEditing(false)}
           onSave={async (payload) => {
             await onSave(user.id, payload);
@@ -37,7 +39,7 @@ export function UserItem({ user, currentUserId, onSave, onDelete }: UserItemProp
         <h3>{user.full_name}</h3>
         <p>{user.email}</p>
         <div>
-          {user.is_admin && <span className="badge badge-personal">admin</span>}
+          <span className="badge badge-personal">{user.role.name}</span>
           {!user.is_active && <span className="badge badge-inactive">inactivo</span>}
           {isSelf && <span className="badge badge-self">tú</span>}
         </div>

@@ -5,8 +5,11 @@ import type { Credentials, RegisterData, UserRead } from '@/features/auth/types'
 
 interface AuthState {
   isAuthenticated: boolean;
-  isAdmin: boolean;
+  permissions: string[];
+  hasPermission: (permission: string) => boolean;
   currentUserId: number | null;
+  userName: string | null;
+  roleName: string | null;
   loading: boolean;
   error: string | null;
   signIn: (credentials: Credentials) => Promise<void>;
@@ -75,10 +78,15 @@ export function useAuth(): AuthState {
     reset();
   }, [reset]);
 
+  const permissions = user?.role.permissions ?? [];
+
   return {
     isAuthenticated: token !== null,
-    isAdmin: user?.is_admin ?? false,
+    permissions,
+    hasPermission: (permission: string) => permissions.includes(permission),
     currentUserId: user?.id ?? null,
+    userName: user?.full_name ?? null,
+    roleName: user?.role.name ?? null,
     loading,
     error,
     signIn,

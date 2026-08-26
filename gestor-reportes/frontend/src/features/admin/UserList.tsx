@@ -1,10 +1,11 @@
 import { Alert } from '@/shared/ui/Alert';
-import type { UserRead } from '@/features/auth/types';
+import type { Role, UserRead } from '@/features/auth/types';
 import type { AdminUserUpdate } from '@/features/admin/types';
 import { UserItem } from '@/features/admin/UserItem';
 
 interface UserListProps {
   users: UserRead[];
+  roles: Role[];
   currentUserId: number | null;
   loading: boolean;
   error: string | null;
@@ -15,6 +16,7 @@ interface UserListProps {
 /** Listado de usuarios del panel de admin (§4). */
 export function UserList({
   users,
+  roles,
   currentUserId,
   loading,
   error,
@@ -36,6 +38,7 @@ export function UserList({
         <UserItem
           key={user.id}
           user={user}
+          roles={roles}
           currentUserId={currentUserId}
           onSave={onSave}
           onDelete={onDelete}
