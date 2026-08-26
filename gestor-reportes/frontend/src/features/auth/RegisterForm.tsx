@@ -37,13 +37,12 @@ export function RegisterForm({ onSubmit, loading, error }: RegisterFormProps) {
 
   return (
     <form
-      className="card"
+      className="auth-form"
       onSubmit={(e) => {
         e.preventDefault();
         handleSubmit();
       }}
     >
-      <h2>Crear cuenta</h2>
       {message !== null && <Alert message={message} />}
       <TextField
         id="reg-email"
