@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancela ejecuciones antiguas de la misma rama/PR al llegar un push nuevo.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (ruff · mypy · pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gestor-reportes/backend
+    env:
+      # Valores de prueba; las suites usan SQLite en memoria (no requieren BD real).
+      JWT_SECRET_KEY: "ci-test-secret"
+      DATABASE_URL: "sqlite+pysqlite:///:memory:"
+      ENVIRONMENT: "test"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: gestor-reportes/backend/pyproject.toml
+
+      - name: Instalar dependencias
+        run: pip install -e ".[dev]"
+
+      - name: Ruff (lint)
+        run: ruff check .
+
+      - name: Ruff (formato)
+        run: ruff format --check .
+
+      - name: Mypy (tipado estricto)
+        run: mypy app
+
+      - name: Pytest
+        run: pytest -q
+
+  frontend:
+    name: Frontend (tsc · eslint · prettier · vitest · build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gestor-reportes/frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: gestor-reportes/frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: TypeScript (tipado estricto)
+        run: npm run typecheck
+
+      - name: ESLint + Prettier
+        run: npm run lint
+
+      - name: Vitest
+        run: npm run test
+
+      - name: Build de producción
+        run: npm run build

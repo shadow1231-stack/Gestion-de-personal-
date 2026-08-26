@@ -1,0 +1,67 @@
+[project]
+name = "gestor-reportes-backend"
+version = "0.1.0"
+description = "API del Gestor de Reportes Personal y Vehicular"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.14",
+    "pydantic[email]>=2.9",
+    "pydantic-settings>=2.6",
+    "python-jose[cryptography]>=3.3",
+    "argon2-cffi>=23.1",
+    "slowapi>=0.1.9",
+    "structlog>=24.4",
+    "sentry-sdk[fastapi]>=2.17",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27",
+    "ruff>=0.7",
+    "mypy>=1.13",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# Fuerza tipado y buenas prácticas; prohíbe código muerto (§1, §2)
+select = ["E", "F", "I", "B", "UP", "ANN", "S", "T20"]
+# S101: assert permitido en tests; T20: print prohibido salvo aquí
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# En tests: assert permitido, sin anotaciones obligatorias, y "contraseñas"
+# de prueba (S105/S106) que no son secretos reales.
+"tests/**" = ["S101", "S105", "S106", "S107", "ANN"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+plugins = ["pydantic.mypy"]
+
+# `python-jose` no distribuye stubs de tipos.
+[[tool.mypy.overrides]]
+module = ["jose", "jose.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+# Empaqueta `app` y sus subpaquetes; excluye `migrations` y `tests`.
+include = ["app*"]
