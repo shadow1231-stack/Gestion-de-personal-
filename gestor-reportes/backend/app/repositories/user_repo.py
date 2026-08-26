@@ -14,8 +14,13 @@ def get_by_id(db: Session, user_id: int) -> User | None:
     return db.get(User, user_id)
 
 
-def create(db: Session, *, email: str, full_name: str, hashed_password: str) -> User:
-    user = User(email=email, full_name=full_name, hashed_password=hashed_password)
+def create(db: Session, *, email: str, full_name: str, hashed_password: str, role_id: int) -> User:
+    user = User(
+        email=email,
+        full_name=full_name,
+        hashed_password=hashed_password,
+        role_id=role_id,
+    )
     db.add(user)
     db.commit()
     db.refresh(user)

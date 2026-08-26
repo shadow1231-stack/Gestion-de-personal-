@@ -16,13 +16,14 @@ from collections.abc import Callable, Iterator  # noqa: E402
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
-from sqlalchemy import Engine, create_engine  # noqa: E402
-from sqlalchemy.orm import sessionmaker  # noqa: E402
+from sqlalchemy import Engine, create_engine, select, update  # noqa: E402
+from sqlalchemy.orm import Session, sessionmaker  # noqa: E402
 from sqlalchemy.pool import StaticPool  # noqa: E402
 
 import app.models  # noqa: E402, F401  (registra las tablas en la metadata)
 from app.core.rate_limit import limiter  # noqa: E402
 from app.db.base import Base  # noqa: E402
+from app.db.seed import ensure_default_roles  # noqa: E402
 from app.db.session import get_db  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -38,6 +39,8 @@ def engine() -> Iterator[Engine]:
         poolclass=StaticPool,
     )
     Base.metadata.create_all(eng)
+    with Session(eng) as session:
+        ensure_default_roles(session)
     yield eng
     Base.metadata.drop_all(eng)
     eng.dispose()
@@ -87,16 +90,15 @@ def auth_headers(client: TestClient) -> Callable[..., dict[str, str]]:
 def admin_headers(
     engine: Engine, auth_headers: Callable[..., dict[str, str]]
 ) -> Callable[..., dict[str, str]]:
-    """Factory que crea un usuario, lo promueve a admin y devuelve su cabecera."""
-    from sqlalchemy import update
-    from sqlalchemy.orm import Session
-
+    """Factory que crea un usuario, le asigna el rol 'admin' y devuelve su cabecera."""
+    from app.models.role import Role
     from app.models.user import User
 
     def _make(email: str = "admin@example.com", password: str = "AdminPass123") -> dict[str, str]:
         headers = auth_headers(email=email, password=password, full_name="Admin")
         with Session(engine) as session:
-            session.execute(update(User).where(User.email == email).values(is_admin=True))
+            admin_role_id = session.scalar(select(Role.id).where(Role.name == "admin"))
+            session.execute(update(User).where(User.email == email).values(role_id=admin_role_id))
             session.commit()
         return headers
 

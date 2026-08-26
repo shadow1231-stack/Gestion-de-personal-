@@ -35,13 +35,30 @@ def test_admin_lists_users(
     assert "otro@example.com" in emails
 
 
-def test_me_reports_admin_flag(
+def test_me_reports_role_and_permissions(
     client: TestClient, admin_headers: Callable[..., dict[str, str]]
 ) -> None:
     admin = admin_headers()
     response = client.get(f"{API}/auth/me", headers=admin)
     assert response.status_code == 200
-    assert response.json()["data"]["is_admin"] is True
+    role = response.json()["data"]["role"]
+    assert role["name"] == "admin"
+    assert "users.manage" in role["permissions"]
+    assert "roles.manage" in role["permissions"]
+
+
+def test_register_assigns_default_role(client: TestClient) -> None:
+    client.post(
+        f"{API}/auth/register",
+        json={"email": "nuevo@example.com", "full_name": "Nuevo", "password": "Password123"},
+    )
+    login = client.post(
+        f"{API}/auth/login", json={"email": "nuevo@example.com", "password": "Password123"}
+    )
+    headers = {"Authorization": f"Bearer {login.json()['data']['access_token']}"}
+    me = client.get(f"{API}/auth/me", headers=headers).json()["data"]
+    assert me["role"]["name"] == "usuario"
+    assert me["role"]["permissions"] == []
 
 
 def test_admin_updates_user(
@@ -62,6 +79,27 @@ def test_admin_updates_user(
     data = response.json()["data"]
     assert data["full_name"] == "Nombre Editado"
     assert data["is_active"] is False
+
+
+def test_admin_creates_user_with_role(
+    client: TestClient, admin_headers: Callable[..., dict[str, str]]
+) -> None:
+    admin = admin_headers()
+    roles = client.get(f"{API}/admin/roles", headers=admin).json()["data"]
+    gestor_id = next(r["id"] for r in roles if r["name"] == "gestor")
+
+    response = client.post(
+        f"{API}/admin/users",
+        json={
+            "email": "gestor@example.com",
+            "full_name": "Gestor",
+            "password": "Password123",
+            "role_id": gestor_id,
+        },
+        headers=admin,
+    )
+    assert response.status_code == 201
+    assert response.json()["data"]["role"]["name"] == "gestor"
 
 
 def test_admin_deletes_user(

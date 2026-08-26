@@ -14,10 +14,19 @@ export interface TokenData {
   token_type: string;
 }
 
+export interface Role {
+  id: number;
+  name: string;
+  description: string;
+  permissions: string[];
+  is_system: boolean;
+  is_default: boolean;
+}
+
 export interface UserRead {
   id: number;
   email: string;
   full_name: string;
   is_active: boolean;
-  is_admin: boolean;
+  role: Role;
 }

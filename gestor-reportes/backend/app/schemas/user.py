@@ -2,8 +2,12 @@
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from app.schemas.role import RoleRead
+
 
 class UserCreate(BaseModel):
+    """Registro público: el rol se asigna en el servidor (nunca lo elige el cliente)."""
+
     email: EmailStr
     full_name: str = Field(min_length=1, max_length=120)
     password: str = Field(min_length=8, max_length=128)
@@ -21,7 +25,16 @@ class UserRead(BaseModel):
     email: EmailStr
     full_name: str
     is_active: bool
-    is_admin: bool
+    role: RoleRead
+
+
+class AdminUserCreate(BaseModel):
+    """Alta de usuario por un administrador, con rol asignado."""
+
+    email: EmailStr
+    full_name: str = Field(min_length=1, max_length=120)
+    password: str = Field(min_length=8, max_length=128)
+    role_id: int
 
 
 class UserUpdate(BaseModel):
@@ -30,4 +43,4 @@ class UserUpdate(BaseModel):
     full_name: str | None = Field(default=None, min_length=1, max_length=120)
     email: EmailStr | None = None
     is_active: bool | None = None
-    is_admin: bool | None = None
+    role_id: int | None = None
