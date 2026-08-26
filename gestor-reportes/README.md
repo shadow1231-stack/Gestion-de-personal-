@@ -1,5 +1,7 @@
 # Gestor de Reportes Personal y Vehicular
 
+[![CI](https://github.com/shadow1231-stack/Gestion-de-personal-/actions/workflows/ci.yml/badge.svg)](https://github.com/shadow1231-stack/Gestion-de-personal-/actions/workflows/ci.yml)
+
 Aplicación para gestionar reportes personales y vehiculares.
 El desarrollo se rige de forma **obligatoria** por las directrices de
 [`../AGENTS.md`](../AGENTS.md) (arquitectura, seguridad, BD, frontend, pruebas y DevOps).
