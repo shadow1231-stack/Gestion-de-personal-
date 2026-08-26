@@ -6,7 +6,7 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import UnauthorizedError
+from app.core.exceptions import ForbiddenError, UnauthorizedError
 from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.user import User
@@ -34,3 +34,13 @@ def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def get_current_admin(user: CurrentUser) -> User:
+    """Exige que el usuario autenticado sea administrador (§3, §5)."""
+    if not user.is_admin:
+        raise ForbiddenError("Requiere privilegios de administrador")
+    return user
+
+
+CurrentAdmin = Annotated[User, Depends(get_current_admin)]

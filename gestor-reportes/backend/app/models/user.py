@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String
+from sqlalchemy import String, false
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
@@ -20,6 +20,7 @@ class User(Base, TimestampMixin):
     full_name: Mapped[str] = mapped_column(String(120))
     hashed_password: Mapped[str] = mapped_column(String(255))
     is_active: Mapped[bool] = mapped_column(default=True)
+    is_admin: Mapped[bool] = mapped_column(default=False, server_default=false())
 
     vehicles: Mapped[list["Vehicle"]] = relationship(
         back_populates="owner", cascade="all, delete-orphan"

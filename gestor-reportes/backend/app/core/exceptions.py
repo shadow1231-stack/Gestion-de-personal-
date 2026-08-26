@@ -31,6 +31,11 @@ class UnauthorizedError(DomainError):
         super().__init__(message, status.HTTP_401_UNAUTHORIZED)
 
 
+class ForbiddenError(DomainError):
+    def __init__(self, message: str = "Acceso denegado") -> None:
+        super().__init__(message, status.HTTP_403_FORBIDDEN)
+
+
 def _envelope(success: bool, message: str) -> dict[str, object]:
     """Respuesta JSON uniforme (§5): {success, data, message}."""
     return {"success": success, "data": None, "message": message}
